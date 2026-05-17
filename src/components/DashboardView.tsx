@@ -2,12 +2,33 @@
 
 import Link from "next/link";
 import { ArrowRight, Target, Edit, FileText, Plus, Calendar, Sparkles } from "lucide-react";
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
 
 interface DashboardViewProps {
   user: any;
 }
 
 export default function DashboardView({ user }: DashboardViewProps) {
+  const resumes = useQuery(
+    api.resumes.getUserResumes,
+    user?.id ? { userId: user.id } : "skip"
+  );
+
+  const getRelativeTime = (timestamp: number) => {
+    const diff = timestamp - Date.now();
+    const days = Math.round(diff / (1000 * 60 * 60 * 24));
+    
+    if (Math.abs(days) < 1) {
+      const hours = Math.round(diff / (1000 * 60 * 60));
+      if (Math.abs(hours) < 1) {
+        return "Just now";
+      }
+      return `${Math.abs(hours)} hour${Math.abs(hours) > 1 ? "s" : ""} ago`;
+    }
+    return `${Math.abs(days)} day${Math.abs(days) > 1 ? "s" : ""} ago`;
+  };
+
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-200 selection:bg-purple-500/30 font-sans flex flex-col relative overflow-x-hidden pt-12">
       {/* Background gradients */}
@@ -91,47 +112,69 @@ export default function DashboardView({ user }: DashboardViewProps) {
 
           <div className="grid md:grid-cols-3 gap-6">
             
-            {/* Skeleton Doc 1 */}
-            <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 hover:border-neutral-850 hover:bg-neutral-900/30 transition-all relative group cursor-pointer">
-              <div className="flex items-start justify-between">
-                <div className="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-purple-400" />
+            {resumes === undefined ? (
+              // Loading skeletons
+              <>
+                <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 animate-pulse min-h-[146px]">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-xl" />
+                    <div className="w-20 h-6 bg-neutral-900 rounded-full" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="w-2/3 h-4 bg-neutral-900 rounded" />
+                    <div className="w-1/3 h-3 bg-neutral-900 rounded" />
+                  </div>
                 </div>
-                <span className="px-2 py-0.5 bg-purple-500/10 text-purple-400 text-[10px] font-semibold rounded-full border border-purple-500/20">
-                  ATS Grade: A
-                </span>
-              </div>
-              <div>
-                <h4 className="font-bold text-neutral-200 text-sm group-hover:text-white transition-colors truncate">
-                  Software_Engineer_CV.pdf
-                </h4>
-                <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Updated 2 days ago</span>
+                <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 animate-pulse min-h-[146px]">
+                  <div className="flex items-start justify-between">
+                    <div className="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-xl" />
+                    <div className="w-20 h-6 bg-neutral-900 rounded-full" />
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="w-2/3 h-4 bg-neutral-900 rounded" />
+                    <div className="w-1/3 h-3 bg-neutral-900 rounded" />
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Skeleton Doc 2 */}
-            <div className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 hover:border-neutral-850 hover:bg-neutral-900/30 transition-all relative group cursor-pointer">
-              <div className="flex items-start justify-between">
-                <div className="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-pink-400" />
-                </div>
-                <span className="px-2 py-0.5 bg-pink-500/10 text-pink-400 text-[10px] font-semibold rounded-full border border-pink-500/20">
-                  ATS Grade: B+
-                </span>
-              </div>
-              <div>
-                <h4 className="font-bold text-neutral-200 text-sm group-hover:text-white transition-colors truncate">
-                  Product_Manager_Resume.pdf
-                </h4>
-                <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-1">
-                  <Calendar className="w-3.5 h-3.5" />
-                  <span>Updated 5 days ago</span>
-                </div>
-              </div>
-            </div>
+              </>
+            ) : resumes && resumes.length > 0 ? (
+              resumes.map((resume) => {
+                const isGradeA = resume.grade.startsWith("A");
+                const isGradeB = resume.grade.startsWith("B");
+                
+                return (
+                  <Link 
+                    key={resume._id} 
+                    href={`/editor?id=${resume._id}`}
+                    className="bg-neutral-900/20 border border-neutral-800/80 rounded-2xl p-6 flex flex-col gap-4 hover:border-neutral-700 hover:bg-neutral-900/30 transition-all relative group cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-xl flex items-center justify-center">
+                        <FileText className={`w-5 h-5 ${isGradeA ? "text-purple-400" : isGradeB ? "text-pink-400" : "text-neutral-400"}`} />
+                      </div>
+                      <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border ${
+                        isGradeA 
+                          ? "bg-purple-500/10 text-purple-400 border-purple-500/20" 
+                          : isGradeB 
+                            ? "bg-pink-500/10 text-pink-400 border-pink-500/20" 
+                            : "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"
+                      }`}>
+                        ATS Grade: {resume.grade}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-neutral-200 text-sm group-hover:text-white transition-colors truncate">
+                        {resume.fullName || "Untitled Resume"}
+                      </h4>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">{resume.jobTitle || "No title specified"}</p>
+                      <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-2">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Updated {getRelativeTime(resume.updatedAt)}</span>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
+            ) : null}
 
             {/* Dash Border Empty State Trigger Card */}
             <Link href="/scan" className="bg-neutral-950/20 border border-dashed border-neutral-800 hover:border-purple-500/30 rounded-2xl p-6 flex flex-col items-center justify-center gap-3 text-center transition-all group min-h-[146px]">
