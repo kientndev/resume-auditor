@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Loader2, Send, AlertCircle, RefreshCcw, ArrowLeft } from "lucide-react";
+import { FileText, Loader2, Send, AlertCircle, RefreshCcw, ArrowLeft, Image as ImageIcon, UploadCloud, Type } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 
 export default function ScanPage() {
+  const [mode, setMode] = useState<"text" | "image">("text");
   const [resumeText, setResumeText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
@@ -92,18 +93,60 @@ export default function ScanPage() {
             transition={{ delay: 0.3 }}
             className="space-y-6 bg-neutral-900/50 p-6 md:p-8 rounded-3xl border border-neutral-800 backdrop-blur-sm"
           >
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-pink-400" />
-                Resume / CV Text
-              </label>
-              <textarea 
-                value={resumeText}
-                onChange={(e) => setResumeText(e.target.value)}
-                placeholder="Paste the extracted text of your resume here..."
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm min-h-[460px] resize-y focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500 transition-all placeholder:text-neutral-600"
-              />
+            {/* Mode Switcher */}
+            <div className="flex bg-neutral-950 p-1 rounded-xl border border-neutral-800">
+              <button
+                onClick={() => setMode("text")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  mode === "text" 
+                    ? "bg-neutral-800 text-white shadow-sm" 
+                    : "text-neutral-400 hover:text-neutral-200"
+                }`}
+              >
+                <Type className="w-4 h-4" />
+                Paste Text
+              </button>
+              <button
+                onClick={() => setMode("image")}
+                className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
+                  mode === "image" 
+                    ? "bg-neutral-800 text-white shadow-sm" 
+                    : "text-neutral-400 hover:text-neutral-200"
+                }`}
+              >
+                <ImageIcon className="w-4 h-4" />
+                Upload Image
+              </button>
             </div>
+
+            {mode === "text" ? (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-pink-400" />
+                  Resume / CV Text
+                </label>
+                <textarea 
+                  value={resumeText}
+                  onChange={(e) => setResumeText(e.target.value)}
+                  placeholder="Paste the extracted text of your resume here..."
+                  className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm min-h-[380px] resize-y focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500 transition-all placeholder:text-neutral-600"
+                />
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-pink-400" />
+                  Resume / CV Image
+                </label>
+                <div className="w-full bg-neutral-950 border-2 border-dashed border-neutral-800 hover:border-pink-500/50 rounded-xl px-4 py-12 flex flex-col items-center justify-center min-h-[380px] transition-all cursor-pointer group">
+                  <div className="w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                    <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-pink-400 transition-colors" />
+                  </div>
+                  <p className="text-neutral-300 font-medium mb-1">Click or drag image to upload</p>
+                  <p className="text-neutral-500 text-xs">Supports PNG, JPG, or JPEG</p>
+                </div>
+              </div>
+            )}
 
             {error && (
               <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 text-sm">
