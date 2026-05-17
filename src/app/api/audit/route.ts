@@ -3,10 +3,35 @@ import { GoogleGenAI } from '@google/genai';
 
 export async function POST(req: Request) {
   try {
-    const { resumeText } = await req.json();
+    const formData = await req.formData();
+    const mode = formData.get('mode') as string;
+    
+    let contents: any[] | string = [];
 
-    if (!resumeText) {
-      return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
+    if (mode === 'text') {
+      const resumeText = formData.get('resumeText') as string;
+      if (!resumeText) {
+        return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
+      }
+      contents = `Here is the resume text to audit:\n\n${resumeText}`;
+    } else if (mode === 'image') {
+      const file = formData.get('file') as File;
+      if (!file) {
+        return NextResponse.json({ error: 'Resume image is required' }, { status: 400 });
+      }
+      
+      const buffer = Buffer.from(await file.arrayBuffer());
+      contents = [
+        "Here is the resume image to audit:",
+        {
+          inlineData: {
+            data: buffer.toString("base64"),
+            mimeType: file.type
+          }
+        }
+      ];
+    } else {
+      return NextResponse.json({ error: 'Invalid mode' }, { status: 400 });
     }
 
     const apiKey = process.env.GEMINI_API_KEY;
@@ -44,7 +69,7 @@ Show them how to rewrite one of their weak points.
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash',
-      contents: `Here is the resume text to audit:\n\n${resumeText}`,
+      contents: contents,
       config: {
         systemInstruction: systemPrompt,
         temperature: 0.7,

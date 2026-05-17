@@ -16,8 +16,12 @@ export default function ScanPage() {
   const [error, setError] = useState<string | null>(null);
 
   const handleAudit = async () => {
-    if (!resumeText.trim()) {
+    if (mode === "text" && !resumeText.trim()) {
       setError("Please provide some resume text.");
+      return;
+    }
+    if (mode === "image" && !selectedImage) {
+      setError("Please select an image to upload.");
       return;
     }
 
@@ -25,12 +29,18 @@ export default function ScanPage() {
     setError(null);
 
     try {
+      const formData = new FormData();
+      formData.append("mode", mode);
+      
+      if (mode === "text") {
+        formData.append("resumeText", resumeText);
+      } else if (mode === "image" && selectedImage) {
+        formData.append("file", selectedImage);
+      }
+
       const res = await fetch("/api/audit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ resumeText }),
+        body: formData,
       });
 
       const data = await res.json();
