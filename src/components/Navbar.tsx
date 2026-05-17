@@ -41,7 +41,18 @@ export default function Navbar() {
         {/* Right Side: Links & CTA */}
         <div className="flex items-center gap-4">
           {userLoaded && !user ? (
-            null
+            <>
+              <SignInButton mode="modal">
+                <button className="text-sm font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer px-2 py-1">
+                  Sign In
+                </button>
+              </SignInButton>
+              <SignInButton mode="modal">
+                <button className="inline-flex items-center justify-center bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white text-sm font-semibold px-4 py-2 rounded-full transition-all active:scale-[0.98] shadow-[0_0_15px_rgba(168,85,247,0.3)] hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] cursor-pointer">
+                  Get Started
+                </button>
+              </SignInButton>
+            </>
           ) : userLoaded && user ? (
             <>
               <Link 
