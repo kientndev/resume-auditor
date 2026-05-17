@@ -3,14 +3,16 @@ import OpenAI from 'openai';
 
 export async function POST(req: Request) {
   try {
-    const { resumeText, apiKey } = await req.json();
+    const { resumeText } = await req.json();
 
     if (!resumeText) {
       return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
     }
 
+    const apiKey = process.env.OPENAI_API_KEY;
+
     if (!apiKey) {
-      return NextResponse.json({ error: 'OpenAI API key is required' }, { status: 400 });
+      return NextResponse.json({ error: 'OpenAI API key is missing in environment variables' }, { status: 500 });
     }
 
     const openai = new OpenAI({ apiKey });
