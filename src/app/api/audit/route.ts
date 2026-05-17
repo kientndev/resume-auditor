@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 
 export async function POST(req: Request) {
   try {
@@ -9,16 +9,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'Groq API key is missing in environment variables' }, { status: 500 });
+      return NextResponse.json({ error: 'Gemini API key is missing in environment variables' }, { status: 500 });
     }
 
-    const openai = new OpenAI({ 
-      apiKey,
-      baseURL: "https://api.groq.com/openai/v1",
-    });
+    const ai = new GoogleGenAI({ apiKey });
 
     const systemPrompt = `You are an elite, brutally honest tech recruiter and resume auditor. Your job is to analyze the extracted text of a user's CV/Resume and provide a harsh but highly constructive evaluation. 
 
@@ -45,16 +42,16 @@ Show them how to rewrite one of their weak points.
 * **Your current bullet:** "[Pick a weak or generic sentence from their text]"
 * **AI Upgraded version:** "[Rewrite it to include a powerful action verb, clear tech stack, and a measurable metric/result]"`;
 
-    const response = await openai.chat.completions.create({
-      model: 'llama3-70b-8192',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Here is the resume text to audit:\n\n${resumeText}` }
-      ],
-      temperature: 0.7,
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: `Here is the resume text to audit:\n\n${resumeText}`,
+      config: {
+        systemInstruction: systemPrompt,
+        temperature: 0.7,
+      }
     });
 
-    const result = response.choices[0]?.message?.content;
+    const result = response.text;
 
     return NextResponse.json({ result });
   } catch (error: any) {
