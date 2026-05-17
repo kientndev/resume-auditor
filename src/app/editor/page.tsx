@@ -629,7 +629,7 @@ export default function EditorPage() {
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
         )}
       </AnimatePresence>
