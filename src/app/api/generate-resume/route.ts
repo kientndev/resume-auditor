@@ -65,6 +65,10 @@ Return the output strictly as a JSON object matching the requested schema.`;
       }
     });
 
+    if (!response.text) {
+      throw new Error("No response text returned from Gemini");
+    }
+
     const result = JSON.parse(response.text);
 
     return NextResponse.json({ result });

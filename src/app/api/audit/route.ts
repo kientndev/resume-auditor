@@ -76,6 +76,10 @@ Show them how to rewrite one of their weak points.
       }
     });
 
+    if (!response.text) {
+      throw new Error("No response text returned from Gemini");
+    }
+
     const result = response.text;
 
     return NextResponse.json({ result });
