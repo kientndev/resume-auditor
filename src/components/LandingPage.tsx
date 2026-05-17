@@ -112,18 +112,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. Multi-template Showcase */}
+      {/* 3. Social Proof Section */}
       <section id="templates" className="py-24 border-t border-[#121824] bg-[#07090e]/30 relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <span className="text-xs font-semibold text-purple-400 uppercase tracking-widest">Visual Presets</span>
-            <h2 className="text-3xl md:text-5xl font-black text-white mt-2 mb-4 uppercase italic">Best Professional Resume Templates</h2>
-            <p className="text-neutral-400 max-w-xl mx-auto text-sm">Select from our signature dark layouts built specifically to satisfy scanner algorithms.</p>
+            <span className="text-xs font-semibold text-purple-400 uppercase tracking-widest">SOCIAL PROOF</span>
+            <h2 className="text-3xl md:text-5xl font-black text-white mt-2 mb-4 uppercase italic">TRUSTED BY DEVELOPERS & ENGINEERS</h2>
+            <p className="text-neutral-400 max-w-xl mx-auto text-sm">See how applicants are optimizing their ATS scores and landing interviews.</p>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 relative">
             
-            {/* Template 1: Clean Teal (Single column, monospace details) */}
+            {/* Card 1: Neon Clean */}
             <div 
               className={`bg-[#0a0d14]/90 border rounded-3xl p-6 transition-all duration-300 relative overflow-hidden group cursor-pointer ${
                 hoveredTemplate === 1 
@@ -137,37 +137,24 @@ export default function LandingPage() {
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center pb-4 border-b border-[#121824]">
                   <div>
-                    <h3 className="font-bold text-white text-sm">NEON CLEAN</h3>
-                    <p className="text-[10px] text-[#10b981] uppercase font-mono tracking-widest mt-0.5">Developer Edition</p>
+                    <div className="flex gap-1 text-[#10b981] text-xs">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
                   </div>
-                  <span className="px-2 py-0.5 bg-[#10b981]/10 text-[#10b981] text-[9px] font-black uppercase tracking-wider rounded border border-[#10b981]/20">Active</span>
+                  <span className="px-2 py-0.5 bg-[#10b981]/10 text-[#10b981] text-[9px] font-black uppercase tracking-wider rounded border border-[#10b981]/20">VERIFIED USER</span>
                 </div>
                 
-                {/* Mock Resume Content */}
-                <div className="space-y-4 text-[10px]">
-                  <div>
-                    <div className="w-16 h-2 bg-neutral-800 rounded mb-1" />
-                    <div className="w-24 h-3 bg-white/10 rounded" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#10b981]" />
-                      <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                    </div>
-                    <div className="w-4/5 h-1.5 bg-neutral-800/60 rounded ml-4" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-[#10b981]" />
-                      <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                    </div>
-                    <div className="w-3/4 h-1.5 bg-neutral-800/60 rounded ml-4" />
-                  </div>
+                <p className="text-xs text-neutral-300 leading-relaxed min-h-[72px]">
+                  "I used the scanner mode to audit my old junior profile. The AI caught 4 dead bullet lines and completely optimized my tech metrics. Got an interview invite 3 days later!"
+                </p>
+
+                <div className="text-[10px] text-neutral-400 font-medium">
+                  — Alex M., <span className="text-white">Full Stack Developer</span>
                 </div>
               </div>
             </div>
 
-            {/* Template 2: Executive Purple (Dual Column) */}
+            {/* Card 2: Executive Purple */}
             <div 
               className={`bg-[#0a0d14]/90 border rounded-3xl p-6 transition-all duration-300 relative overflow-hidden group cursor-pointer ${
                 hoveredTemplate === 2 
@@ -181,74 +168,50 @@ export default function LandingPage() {
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center pb-4 border-b border-[#121824]">
                   <div>
-                    <h3 className="font-bold text-white text-sm">EXECUTIVE PURPLE</h3>
-                    <p className="text-[10px] text-[#8b5cf6] uppercase font-mono tracking-widest mt-0.5">Management Edition</p>
+                    <div className="flex gap-1 text-[#8b5cf6] text-xs">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
                   </div>
-                  <span className="px-2 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] text-[9px] font-black uppercase tracking-wider rounded border border-[#8b5cf6]/20">Trending</span>
+                  <span className="px-2 py-0.5 bg-[#8b5cf6]/10 text-[#8b5cf6] text-[9px] font-black uppercase tracking-wider rounded border border-[#8b5cf6]/20">TOP UTILITY</span>
                 </div>
                 
-                {/* Mock Resume Content - Dual Column */}
-                <div className="grid grid-cols-3 gap-4 text-[10px]">
-                  {/* Left Column */}
-                  <div className="col-span-1 border-r border-[#121824] pr-2 space-y-3">
-                    <div className="w-8 h-8 rounded-full bg-neutral-800" />
-                    <div className="w-full h-2 bg-[#8b5cf6]/20 rounded" />
-                    <div className="w-3/4 h-1.5 bg-neutral-800 rounded" />
-                    <div className="w-2/4 h-1.5 bg-neutral-800 rounded" />
-                  </div>
-                  
-                  {/* Right Column */}
-                  <div className="col-span-2 space-y-3">
-                    <div className="w-full h-3 bg-white/10 rounded" />
-                    <div className="space-y-1.5">
-                      <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                      <div className="w-5/6 h-1.5 bg-neutral-800/60 rounded" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                      <div className="w-4/5 h-1.5 bg-neutral-800/60 rounded" />
-                    </div>
-                  </div>
+                <p className="text-xs text-neutral-300 leading-relaxed min-h-[72px]">
+                  "Writing resume points has always been my kryptonite. The split-screen AI generator took my raw bullet inputs and formatted them into pure executive gold."
+                </p>
+
+                <div className="text-[10px] text-neutral-400 font-medium">
+                  — Sarah L., <span className="text-white">Frontend Engineer</span>
                 </div>
               </div>
             </div>
 
-            {/* Template 3: Sentinel Dark (Cyber Duo-Tone) */}
+            {/* Card 3: Sentinel Dark */}
             <div 
               className={`bg-[#0a0d14]/90 border rounded-3xl p-6 transition-all duration-300 relative overflow-hidden group cursor-pointer ${
                 hoveredTemplate === 3 
-                  ? "border-[#10b981] shadow-[0_0_40px_rgba(16,185,129,0.15)] scale-[1.02]" 
+                  ? "border-[#06b6d4] shadow-[0_0_40px_rgba(6,182,212,0.15)] scale-[1.02]" 
                   : "border-[#121824]"
               }`}
               onMouseEnter={() => setHoveredTemplate(3)}
               onMouseLeave={() => setHoveredTemplate(null)}
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#10b981]/5 to-[#8b5cf6]/5 rounded-bl-full" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-[#06b6d4]/5 to-transparent rounded-bl-full" />
               <div className="flex flex-col gap-6">
                 <div className="flex justify-between items-center pb-4 border-b border-[#121824]">
                   <div>
-                    <h3 className="font-bold text-white text-sm">SENTINEL DARK</h3>
-                    <p className="text-[10px] text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-[#8b5cf6] uppercase font-mono tracking-widest mt-0.5">Fortress Edition</p>
+                    <div className="flex gap-1 text-[#06b6d4] text-xs">
+                      <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+                    </div>
                   </div>
-                  <span className="px-2 py-0.5 bg-gradient-to-r from-[#10b981]/10 to-[#8b5cf6]/10 text-[#10b981] text-[9px] font-black uppercase tracking-wider rounded border border-[#10b981]/20">Premium</span>
+                  <span className="px-2 py-0.5 bg-[#06b6d4]/10 text-[#06b6d4] text-[9px] font-black uppercase tracking-wider rounded border border-[#06b6d4]/20">PREMIUM</span>
                 </div>
                 
-                {/* Mock Resume Content - Single Column Cyber details */}
-                <div className="space-y-4 text-[10px]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-6 h-6 rounded bg-gradient-to-br from-[#10b981] to-[#8b5cf6]/60 p-0.5">
-                      <div className="w-full h-full bg-[#0a0d14] rounded-sm" />
-                    </div>
-                    <div className="w-24 h-3 bg-white/10 rounded" />
-                  </div>
-                  <div className="space-y-2 border-l-2 border-gradient border-l-[#10b981] pl-3">
-                    <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                    <div className="w-5/6 h-1.5 bg-neutral-800/60 rounded" />
-                  </div>
-                  <div className="space-y-2 border-l-2 border-gradient border-l-[#8b5cf6] pl-3">
-                    <div className="w-full h-1.5 bg-neutral-800 rounded" />
-                    <div className="w-4/5 h-1.5 bg-neutral-800/60 rounded" />
-                  </div>
+                <p className="text-xs text-neutral-300 leading-relaxed min-h-[72px]">
+                  "The localized parsing engine is incredibly secure. Knowing my career details aren't being scraped or sold while I generate clean PDF sheets is a massive win."
+                </p>
+
+                <div className="text-[10px] text-neutral-400 font-medium">
+                  — David K., <span className="text-white">Security Analyst</span>
                 </div>
               </div>
             </div>
