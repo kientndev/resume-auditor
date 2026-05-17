@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Key, Loader2, Send, AlertCircle, RefreshCcw } from "lucide-react";
+import { FileText, Loader2, Send, AlertCircle, RefreshCcw } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 export default function Home() {
