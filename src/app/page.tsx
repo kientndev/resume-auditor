@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Zap, Target, ShieldCheck, Briefcase } from "lucide-react";
+import { ArrowRight, Zap, Target, ShieldCheck } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -7,23 +7,6 @@ export default function LandingPage() {
       {/* Background gradients */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-neutral-950 to-neutral-950 -z-10" />
 
-      {/* Navigation */}
-      <nav className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
-            <Briefcase className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold tracking-tight text-white">YourRecruiter</span>
-        </div>
-        <div>
-          <Link 
-            href="/scan" 
-            className="text-sm font-medium text-neutral-300 hover:text-white transition-colors"
-          >
-            Sign In
-          </Link>
-        </div>
-      </nav>
 
       {/* Hero Section */}
       <main className="flex-grow flex flex-col items-center justify-center px-6 py-20 text-center">
