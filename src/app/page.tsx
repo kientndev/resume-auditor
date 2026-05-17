@@ -128,7 +128,7 @@ export default function Home() {
             transition={{ delay: 0.4 }}
             className="lg:sticky lg:top-8"
           >
-            <div className="bg-neutral-900/50 rounded-3xl border border-neutral-800 backdrop-blur-sm overflow-hidden h-full min-h-[600px] flex flex-col">
+            <div className="bg-neutral-900/50 rounded-3xl border border-neutral-800 backdrop-blur-sm overflow-hidden h-[600px] max-h-[calc(100vh-4rem)] flex flex-col">
               <div className="p-6 border-b border-neutral-800 bg-neutral-900/80 flex items-center justify-between">
                 <h2 className="font-semibold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
