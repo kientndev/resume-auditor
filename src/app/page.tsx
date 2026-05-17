@@ -6,17 +6,12 @@ import { FileText, Key, Loader2, Send, AlertCircle, RefreshCcw } from "lucide-re
 import ReactMarkdown from "react-markdown";
 
 export default function Home() {
-  const [apiKey, setApiKey] = useState("");
   const [resumeText, setResumeText] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleAudit = async () => {
-    if (!apiKey) {
-      setError("Please provide an OpenAI API Key.");
-      return;
-    }
     if (!resumeText.trim()) {
       setError("Please provide some resume text.");
       return;
@@ -31,7 +26,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ resumeText, apiKey }),
+        body: JSON.stringify({ resumeText }),
       });
 
       const data = await res.json();
@@ -89,21 +84,6 @@ export default function Home() {
           >
             <div className="space-y-2">
               <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-                <Key className="w-4 h-4 text-purple-400" />
-                OpenAI API Key
-              </label>
-              <input 
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-..."
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all placeholder:text-neutral-600"
-              />
-              <p className="text-xs text-neutral-500">Your key is only used for this session and is never stored.</p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-pink-400" />
                 Resume / CV Text
               </label>
@@ -111,7 +91,7 @@ export default function Home() {
                 value={resumeText}
                 onChange={(e) => setResumeText(e.target.value)}
                 placeholder="Paste the extracted text of your resume here..."
-                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm min-h-[300px] resize-y focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500 transition-all placeholder:text-neutral-600"
+                className="w-full bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-sm min-h-[460px] resize-y focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500 transition-all placeholder:text-neutral-600"
               />
             </div>
 
