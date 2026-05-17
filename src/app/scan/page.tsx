@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Loader2, Send, AlertCircle, RefreshCcw, ArrowLeft, Image as ImageIcon, UploadCloud, Type } from "lucide-react";
+import { FileText, Loader2, Send, AlertCircle, RefreshCcw, ArrowLeft, Image as ImageIcon, UploadCloud, Type, CheckCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 
 export default function ScanPage() {
   const [mode, setMode] = useState<"text" | "image">("text");
   const [resumeText, setResumeText] = useState("");
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -138,12 +140,46 @@ export default function ScanPage() {
                   <ImageIcon className="w-4 h-4 text-pink-400" />
                   Resume / CV Image
                 </label>
-                <div className="w-full bg-neutral-950 border-2 border-dashed border-neutral-800 hover:border-pink-500/50 rounded-xl px-4 py-12 flex flex-col items-center justify-center min-h-[380px] transition-all cursor-pointer group">
-                  <div className="w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-pink-400 transition-colors" />
-                  </div>
-                  <p className="text-neutral-300 font-medium mb-1">Click or drag image to upload</p>
-                  <p className="text-neutral-500 text-xs">Supports PNG, JPG, or JPEG</p>
+                
+                <input 
+                  type="file" 
+                  accept="image/png, image/jpeg, image/jpg" 
+                  className="hidden" 
+                  ref={fileInputRef}
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      setSelectedImage(e.target.files[0]);
+                    }
+                  }}
+                />
+
+                <div 
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`w-full border-2 border-dashed rounded-xl px-4 py-12 flex flex-col items-center justify-center min-h-[380px] transition-all cursor-pointer group ${
+                    selectedImage 
+                      ? "bg-purple-500/5 border-purple-500/50 hover:border-purple-400" 
+                      : "bg-neutral-950 border-neutral-800 hover:border-pink-500/50"
+                  }`}
+                >
+                  {selectedImage ? (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
+                        <CheckCircle className="w-8 h-8 text-purple-400" />
+                      </div>
+                      <p className="text-purple-300 font-medium mb-1 text-center truncate max-w-[250px]">
+                        {selectedImage.name}
+                      </p>
+                      <p className="text-purple-400/60 text-xs">Click to change image</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                        <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-pink-400 transition-colors" />
+                      </div>
+                      <p className="text-neutral-300 font-medium mb-1">Click or drag image to upload</p>
+                      <p className="text-neutral-500 text-xs">Supports PNG, JPG, or JPEG</p>
+                    </>
+                  )}
                 </div>
               </div>
             )}
