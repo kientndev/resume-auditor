@@ -13,7 +13,7 @@ export default function LandingPage() {
           <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-xl">
             <Briefcase className="w-5 h-5 text-white" />
           </div>
-          <span className="text-xl font-bold tracking-tight text-white">yourrecruiter</span>
+          <span className="text-xl font-bold tracking-tight text-white">YourRecruiter</span>
         </div>
         <div>
           <Link 
@@ -53,7 +53,7 @@ export default function LandingPage() {
       <section className="border-t border-neutral-900 bg-neutral-950/50 backdrop-blur-sm relative z-10 py-24">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why use yourrecruiter?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Why use YourRecruiter?</h2>
             <p className="text-neutral-400">Because sugarcoating won't get you hired.</p>
           </div>
           
@@ -96,7 +96,7 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-neutral-900 py-8 text-center text-neutral-500 text-sm">
-        <p>&copy; {new Date().getFullYear()} yourrecruiter. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} YourRecruiter. All rights reserved.</p>
       </footer>
     </div>
   );
