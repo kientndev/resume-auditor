@@ -125,11 +125,111 @@ export default function EditorPage() {
     setIsDownloading(true);
 
     try {
-      const canvas = await html2canvas(element, {
+      // Create a temporary clean sandboxed iframe
+      const iframe = document.createElement("iframe");
+      iframe.style.position = "absolute";
+      iframe.style.top = "-9999px";
+      iframe.style.left = "-9999px";
+      iframe.style.width = "210mm";
+      iframe.style.height = "297mm";
+      document.body.appendChild(iframe);
+
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iframeDoc) throw new Error("Could not access iframe document");
+
+      // Inject standard, simple layout CSS that avoids modern color functions like lab() / oklch()
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              body {
+                margin: 0;
+                padding: 0;
+                font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                background-color: #ffffff;
+                color: #000000;
+              }
+              .printable-container {
+                width: 210mm;
+                min-height: 297mm;
+                padding: 20mm;
+                box-sizing: border-box;
+                background-color: #ffffff;
+              }
+              .text-center { text-align: center; }
+              .border-b { border-bottom: 1px solid #e5e7eb; }
+              .border-b-2 { border-bottom: 2px solid #1f2937; }
+              .pb-6 { padding-bottom: 1.5rem; }
+              .pb-1 { padding-bottom: 0.25rem; }
+              .mb-6 { margin-bottom: 1.5rem; }
+              .mb-3 { margin-bottom: 0.75rem; }
+              .mb-2 { margin-bottom: 0.5rem; }
+              .mt-3 { margin-top: 0.75rem; }
+              .mt-1.5 { margin-top: 0.375rem; }
+              .text-4xl { font-size: 2.25rem; font-weight: 800; }
+              .text-base { font-size: 1rem; font-weight: 700; }
+              .text-sm { font-size: 0.875rem; }
+              .text-xs { font-size: 0.75rem; }
+              .text-neutral-900 { color: #111827; }
+              .text-neutral-800 { color: #1f2937; }
+              .text-neutral-600 { color: #4b5563; }
+              .text-neutral-500 { color: #6b7280; }
+              .text-neutral-400 { color: #9ca3af; }
+              .text-purple-700 { color: #7e22ce; }
+              .font-extrabold { font-weight: 800; }
+              .font-bold { font-weight: 700; }
+              .font-semibold { font-weight: 600; }
+              .tracking-tight { letter-spacing: -0.025em; }
+              .tracking-widest { letter-spacing: 0.1em; }
+              .uppercase { text-transform: uppercase; }
+              .flex { display: flex; }
+              .flex-col { flex-direction: column; }
+              .flex-wrap { flex-wrap: wrap; }
+              .items-center { align-items: center; }
+              .justify-between { justify-content: space-between; }
+              .justify-center { justify-content: center; }
+              .gap-4 { gap: 1rem; }
+              .gap-2 { gap: 0.5rem; }
+              .space-y-6 > * + * { margin-top: 1.5rem; }
+              .space-y-4 > * + * { margin-top: 1rem; }
+              .space-y-1 > * + * { margin-top: 0.25rem; }
+              .list-disc { list-style-type: disc; }
+              .list-outside { list-style-position: outside; }
+              .ml-4 { margin-left: 1rem; }
+              .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+              .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+              .bg-neutral-100 { background-color: #f3f4f6; }
+              .rounded { border-radius: 0.25rem; }
+              .leading-relaxed { line-height: 1.625; }
+              .box-border { box-sizing: border-box; }
+            </style>
+          </head>
+          <body>
+            <div class="printable-container">
+              ${element.innerHTML}
+            </div>
+          </body>
+        </html>
+      `;
+
+      iframeDoc.open();
+      iframeDoc.write(htmlContent);
+      iframeDoc.close();
+
+      // Wait briefly for content rendering
+      await new Promise((resolve) => setTimeout(resolve, 250));
+
+      const target = iframeDoc.querySelector(".printable-container") as HTMLElement;
+
+      const canvas = await html2canvas(target, {
         scale: 2,
         useCORS: true,
         backgroundColor: "#ffffff",
       });
+
+      // Safely cleanup the iframe
+      document.body.removeChild(iframe);
+
       const imgData = canvas.toDataURL("image/png");
       const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210;
