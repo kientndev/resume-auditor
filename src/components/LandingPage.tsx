@@ -40,42 +40,6 @@ export default function LandingPage() {
       <div className="absolute top-[800px] right-0 w-[400px] h-[400px] bg-purple-950/10 -z-10 blur-[100px] pointer-events-none" />
       <div className="absolute top-[1600px] left-0 w-[400px] h-[400px] bg-emerald-950/5 -z-10 blur-[100px] pointer-events-none" />
 
-      {/* 1. Header & Navigation (Integrated into page for perfect dark transitions) */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#07090e]/80 backdrop-blur-md border-b border-[#121824]">
-        <div className="w-full max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-10">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="bg-gradient-to-br from-[#8b5cf6] to-[#a78bfa] p-1.5 rounded-lg group-hover:scale-105 transition-transform shadow-[0_0_15px_rgba(139,92,246,0.3)]">
-                <Briefcase className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors">YourRecruiter</span>
-            </Link>
-
-            {/* Nav Links */}
-            <nav className="hidden md:flex items-center gap-8">
-              <a href="#features" className="text-xs font-semibold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors">Features</a>
-              <a href="#templates" className="text-xs font-semibold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors">Templates</a>
-              <a href="#security" className="text-xs font-semibold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors">Security Audit</a>
-              <a href="#faq" className="text-xs font-semibold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors">FAQ</a>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <SignInButton mode="modal">
-              <button className="text-xs font-semibold uppercase tracking-wider text-neutral-400 hover:text-white transition-colors px-2 py-1 cursor-pointer">
-                Sign In
-              </button>
-            </SignInButton>
-            
-            <SignInButton mode="modal">
-              <button className="inline-flex items-center justify-center border border-[#10b981] hover:bg-[#10b981]/10 text-[#10b981] hover:text-white text-xs font-black uppercase tracking-widest px-4 py-2.5 rounded-lg transition-all active:scale-[0.98] cursor-pointer shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_20px_rgba(16,185,129,0.25)]">
-                Start Auditing
-              </button>
-            </SignInButton>
-          </div>
-        </div>
-      </header>
 
       {/* 2. Hero Section (The "Facelift") */}
       <section className="flex flex-col items-center justify-center px-6 py-24 text-center max-w-5xl mx-auto relative z-10">
