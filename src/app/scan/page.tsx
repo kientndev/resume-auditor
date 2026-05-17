@@ -282,9 +282,20 @@ export default function ScanPage() {
                       key="result"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="prose prose-invert prose-purple max-w-none prose-headings:font-bold prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-purple-300"
+                      className="flex flex-col gap-6"
                     >
-                      <ReactMarkdown>{result}</ReactMarkdown>
+                      <div className="prose prose-invert prose-purple max-w-none prose-headings:font-bold prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-neutral-300 prose-li:text-neutral-300 prose-strong:text-purple-300">
+                        <ReactMarkdown>{result}</ReactMarkdown>
+                      </div>
+
+                      <div className="pt-6 border-t border-neutral-800">
+                        <Link 
+                          href="/editor"
+                          className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] text-lg"
+                        >
+                          ✨ Fix with AI Generator
+                        </Link>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
