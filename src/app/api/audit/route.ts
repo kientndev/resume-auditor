@@ -9,13 +9,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
     }
 
-    const apiKey = process.env.OPENAI_API_KEY;
+    const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
-      return NextResponse.json({ error: 'OpenAI API key is missing in environment variables' }, { status: 500 });
+      return NextResponse.json({ error: 'Groq API key is missing in environment variables' }, { status: 500 });
     }
 
-    const openai = new OpenAI({ apiKey });
+    const openai = new OpenAI({ 
+      apiKey,
+      baseURL: "https://api.groq.com/openai/v1",
+    });
 
     const systemPrompt = `You are an elite, brutally honest tech recruiter and resume auditor. Your job is to analyze the extracted text of a user's CV/Resume and provide a harsh but highly constructive evaluation. 
 
@@ -43,7 +46,7 @@ Show them how to rewrite one of their weak points.
 * **AI Upgraded version:** "[Rewrite it to include a powerful action verb, clear tech stack, and a measurable metric/result]"`;
 
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'llama3-70b-8192',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Here is the resume text to audit:\n\n${resumeText}` }
