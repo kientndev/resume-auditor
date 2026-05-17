@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { User, Briefcase, Code, Sparkles, Loader2, FileText, Eye, Download, X, Mail, Phone, Plus, Trash2 } from "lucide-react";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { trackEvent } from "@/utils/analytics";
 
 interface Experience {
   role: string;
@@ -63,6 +64,10 @@ export default function EditorPage() {
       const data = await res.json();
       if (data.result) {
         setResumeData(data.result);
+        trackEvent("resume_generated", {
+          fullName: data.result.personalInfo?.fullName || "Anonymous",
+          jobTitle: data.result.personalInfo?.jobTitle || "Unknown"
+        });
       }
     } catch (err) {
       console.error(err);
@@ -249,6 +254,10 @@ export default function EditorPage() {
       }
 
       pdf.save(`${resumeData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.pdf`);
+      trackEvent("download_pdf", {
+        fullName: resumeData.personalInfo.fullName,
+        jobTitle: resumeData.personalInfo.jobTitle
+      });
     } catch (err) {
       console.error("PDF generation failed:", err);
     } finally {

@@ -6,6 +6,7 @@ import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import { useEffect } from "react";
+import { trackEvent } from "@/utils/analytics";
 
 export default function Navbar() {
   const { user, isLoaded: userLoaded } = useUser();
@@ -20,6 +21,9 @@ export default function Navbar() {
           email: user.emailAddresses[0]?.emailAddress,
           name: user.fullName || user.firstName || undefined,
           imageUrl: user.imageUrl || undefined,
+        });
+        trackEvent("user_login", { 
+          email: user.emailAddresses[0]?.emailAddress || "anonymous" 
         });
       } catch (e) {
         console.error("Failed to sync user to Convex:", e);

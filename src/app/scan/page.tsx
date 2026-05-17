@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FileText, Loader2, Send, AlertCircle, RefreshCcw, ArrowLeft, Image as ImageIcon, UploadCloud, Type, CheckCircle } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import Link from "next/link";
+import { trackEvent } from "@/utils/analytics";
 
 export default function ScanPage() {
   const [mode, setMode] = useState<"text" | "image">("text");
@@ -50,6 +51,7 @@ export default function ScanPage() {
       }
 
       setResult(data.result);
+      trackEvent("resume_audited", { mode });
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
