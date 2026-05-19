@@ -44,6 +44,19 @@ export default function Navbar() {
 
         {/* Right Side: Links & CTA */}
         <div className="flex items-center gap-4">
+          {/* Navigation Links */}
+          <div className="hidden md:flex items-center gap-4 mr-4">
+            <Link href="/pricing" className="text-sm font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer px-2 py-1">
+              Pricing
+            </Link>
+            <Link href="/about" className="text-sm font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer px-2 py-1">
+              About
+            </Link>
+            <Link href="/contact" className="text-sm font-semibold text-neutral-400 hover:text-white transition-colors cursor-pointer px-2 py-1">
+              Contact
+            </Link>
+          </div>
+
           {userLoaded && !user ? (
             <>
               <SignInButton mode="modal">
