@@ -8,7 +8,7 @@ import jsPDF from "jspdf";
 import { trackEvent } from "@/utils/analytics";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "../../../convex/_generated/api";
 
 interface Experience {
   role: string;
@@ -32,9 +32,12 @@ export default function EditorPage() {
   const [rawText, setRawText] = useState("");
   const [loading, setLoading] = useState(false);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const { user, isLoaded: userLoaded } = useUser();
   const saveResume = useMutation(api.resumes.saveResume);
-  const [saveLoading, setSaveLoading] = useState(false);  const [resumeData, setResumeData] = useState<ResumeData>({
+  const [saveLoading, setSaveLoading] = useState(false);
+  
+  const [resumeData, setResumeData] = useState<ResumeData>({
     personalInfo: {
       fullName: 'John Doe',
       jobTitle: 'Frontend Engineer',
@@ -54,6 +57,30 @@ export default function EditorPage() {
     ],
     skills: ['React', 'TypeScript', 'Node.js', 'AWS', 'Tailwind CSS']
   });
+
+  const handleGenerate = async () => {
+    if (!rawText.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch("/api/generate-resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resumeText: rawText })
+      });
+      const data = await res.json();
+      if (data.result) {
+        setResumeData(data.result);
+        trackEvent("resume_generated", {
+          fullName: data.result.personalInfo?.fullName || "Anonymous",
+          jobTitle: data.result.personalInfo?.jobTitle || "Unknown"
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSave = async () => {
     if (!user?.id || !userLoaded) {
@@ -290,6 +317,30 @@ export default function EditorPage() {
             </p>
           </div>
           <div className="flex items-center gap-3 w-full sm:w-auto">
+            <button 
+              onClick={() => setIsPreviewOpen(true)}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-neutral-300 hover:text-white text-sm font-semibold px-5 py-3 rounded-xl transition-all"
+            >
+              <Eye className="w-4 h-4" />
+              Preview Document
+            </button>
+            <button 
+              onClick={downloadPdf}
+              disabled={isDownloading}
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-400 hover:to-pink-400 text-white text-sm font-semibold px-5 py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] disabled:opacity-50"
+            >
+              {isDownloading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </>
+              )}
+            </button>
             <button 
               onClick={handleSave}
               disabled={saveLoading}
