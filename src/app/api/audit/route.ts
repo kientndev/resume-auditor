@@ -8,6 +8,8 @@ import { promisify } from 'util';
 
 const execFileAsync = promisify(execFile);
 
+export const runtime = 'nodejs';
+
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 /** Strict schema enforced on every non-image audit response */
@@ -234,17 +236,19 @@ export async function POST(req: Request) {
       streamConfig.responseSchema = RESPONSE_SCHEMA;
     }
 
-    const stream = await ai.models.generateContentStream({
-      model: 'gemini-2.5-flash',
-      contents: contents,
-      config: streamConfig,
-    });
-
-    // Stream raw tokens to the client; client buffers and parses when done
+    // Stream raw tokens to the client; client buffers and parses when done.
+    // Provider errors are emitted in-band so the browser does not log /api/audit
+    // as a failed network resource for recoverable upstream failures.
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
+          const stream = await ai.models.generateContentStream({
+            model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
+            contents: contents,
+            config: streamConfig,
+          });
+
           for await (const chunk of stream) {
             const text = chunk.text;
             if (text) {
