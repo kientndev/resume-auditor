@@ -27,4 +27,8 @@ export default defineSchema({
     skills: v.array(v.string()),
     updatedAt: v.number(),
   }).index("by_userId", ["userId"]),
+  waitlist: defineTable({
+    email: v.string(),
+    joinedAt: v.number(),
+  }).index("by_email", ["email"]),
 });

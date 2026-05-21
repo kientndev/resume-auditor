@@ -1,9 +1,39 @@
 "use client";
 
-import { Check, Zap, Crown, Sparkles } from "lucide-react";
+import { useState, FormEvent } from "react";
+import { Check, Zap, Crown, Sparkles, Loader2, PartyPopper, Mail } from "lucide-react";
 import Link from "next/link";
+import { useMutation } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 export default function PricingPage() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+  const joinWaitlist = useMutation(api.waitlist.join);
+
+  const handleWaitlistSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = email.trim();
+
+    // Basic email validation
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setStatus("error");
+      setMessage("Please enter a valid email address.");
+      return;
+    }
+
+    setStatus("loading");
+    try {
+      const result = await joinWaitlist({ email: trimmed });
+      setStatus("success");
+      setMessage(result.message);
+    } catch {
+      setStatus("error");
+      setMessage("Something went wrong. Please try again.");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#07090e] text-[#b4bcca] font-sans flex flex-col w-full relative overflow-x-hidden pt-16">
       
@@ -125,12 +155,59 @@ export default function PricingPage() {
                 </li>
               </ul>
 
-              <Link 
-                href="/scan"
-                className="w-full inline-flex items-center justify-center bg-gradient-to-r from-[#8b5cf6] to-purple-600 hover:from-purple-500 hover:to-purple-500 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] cursor-pointer"
-              >
-                Upgrade to Pro
-              </Link>
+              {/* Waitlist Form / CTA */}
+              {status === "success" ? (
+                <div className="space-y-3 animate-in fade-in duration-500">
+                  <div className="flex items-center justify-center gap-2 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-xl px-4 py-3">
+                    <PartyPopper className="w-5 h-5 text-[#8b5cf6] flex-shrink-0" />
+                    <span className="text-sm text-[#8b5cf6] font-semibold">{message}</span>
+                  </div>
+                  <p className="text-center text-neutral-500 text-xs">
+                    Your <span className="text-[#8b5cf6] font-bold">15% launch discount</span> is reserved.
+                  </p>
+                </div>
+              ) : (
+                <form onSubmit={handleWaitlistSubmit} className="space-y-3">
+                  <div className="relative">
+                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 pointer-events-none" />
+                    <input
+                      id="waitlist-email"
+                      type="email"
+                      placeholder="Enter your email to join the waitlist"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (status === "error") setStatus("idle");
+                      }}
+                      disabled={status === "loading"}
+                      className="w-full bg-[#0d1117] border border-[#8b5cf6]/30 focus:border-[#8b5cf6] rounded-xl px-4 py-3 pl-10 text-sm text-white placeholder:text-neutral-500 outline-none transition-all disabled:opacity-50"
+                    />
+                  </div>
+
+                  {status === "error" && (
+                    <p className="text-red-400 text-xs px-1 animate-in fade-in duration-300">{message}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={status === "loading"}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#8b5cf6] to-purple-600 hover:from-purple-500 hover:to-purple-500 text-white text-sm font-semibold px-6 py-3 rounded-xl transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {status === "loading" ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Joining...
+                      </>
+                    ) : (
+                      "Join Waitlist — Get 15% Off"
+                    )}
+                  </button>
+
+                  <p className="text-center text-neutral-500 text-xs">
+                    Pro is coming soon. Join the waitlist to lock in a <span className="text-[#8b5cf6] font-bold">15% early-bird discount</span>.
+                  </p>
+                </form>
+              )}
             </div>
           </div>
 
