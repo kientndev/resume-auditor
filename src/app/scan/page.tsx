@@ -8,21 +8,44 @@ import Link from "next/link";
 import { trackEvent } from "@/utils/analytics";
 
 export default function ScanPage() {
-  const [mode, setMode] = useState<"text" | "image">("text");
+  const [mode, setMode] = useState<"text" | "file">("text");
   const [resumeText, setResumeText] = useState("");
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFileChange = (file: File) => {
+    setError(null);
+    const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    const allowedExts = ['.pdf', '.docx', '.doc', '.txt', '.png', '.jpeg', '.jpg'];
+    const excelExts = ['.xlsx', '.xls', '.csv'];
+
+    if (excelExts.includes(ext)) {
+      setError("Excel files (.xlsx, .xls, .csv) are explicitly blocked. Please upload a PDF, Word document, text file, or image instead.");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    if (!allowedExts.includes(ext)) {
+      setError("Unsupported file format. Please upload a PDF, Word document (.docx, .doc), text file (.txt), or image (.png, .jpeg, .jpg).");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    setSelectedFile(file);
+  };
 
   const handleAudit = async () => {
     if (mode === "text" && !resumeText.trim()) {
       setError("Please provide some resume text.");
       return;
     }
-    if (mode === "image" && !selectedImage) {
-      setError("Please select an image to upload.");
+    if (mode === "file" && !selectedFile) {
+      setError("Please select a file to upload.");
       return;
     }
 
@@ -35,8 +58,8 @@ export default function ScanPage() {
       
       if (mode === "text") {
         formData.append("resumeText", resumeText);
-      } else if (mode === "image" && selectedImage) {
-        formData.append("file", selectedImage);
+      } else if (mode === "file" && selectedFile) {
+        formData.append("file", selectedFile);
       }
 
       const res = await fetch("/api/audit", {
@@ -121,15 +144,15 @@ export default function ScanPage() {
                 Paste Text
               </button>
               <button
-                onClick={() => setMode("image")}
+                onClick={() => setMode("file")}
                 className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                  mode === "image" 
+                  mode === "file" 
                     ? "bg-neutral-800 text-white shadow-sm" 
                     : "text-neutral-400 hover:text-neutral-200"
                 }`}
               >
-                <ImageIcon className="w-4 h-4" />
-                Upload Image
+                <UploadCloud className="w-4 h-4" />
+                Upload Resume
               </button>
             </div>
 
@@ -149,18 +172,18 @@ export default function ScanPage() {
             ) : (
               <div className="space-y-2">
                 <label className="text-sm font-medium text-neutral-300 flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-pink-400" />
-                  Resume / CV Image
+                  <UploadCloud className="w-4 h-4 text-pink-400" />
+                  Resume / CV File
                 </label>
                 
                 <input 
                   type="file" 
-                  accept="image/png, image/jpeg, image/jpg" 
+                  accept=".pdf,.docx,.doc,.txt,image/png,image/jpeg,image/jpg" 
                   className="hidden" 
                   ref={fileInputRef}
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
-                      setSelectedImage(e.target.files[0]);
+                      handleFileChange(e.target.files[0]);
                     }
                   }}
                 />
@@ -168,28 +191,30 @@ export default function ScanPage() {
                 <div 
                   onClick={() => fileInputRef.current?.click()}
                   className={`w-full border-2 border-dashed rounded-xl px-4 py-12 flex flex-col items-center justify-center min-h-[380px] transition-all cursor-pointer group ${
-                    selectedImage 
+                    selectedFile 
                       ? "bg-purple-500/5 border-purple-500/50 hover:border-purple-400" 
                       : "bg-neutral-950 border-neutral-800 hover:border-pink-500/50"
                   }`}
                 >
-                  {selectedImage ? (
+                  {selectedFile ? (
                     <>
                       <div className="w-16 h-16 rounded-full bg-purple-500/20 flex items-center justify-center mb-4">
                         <CheckCircle className="w-8 h-8 text-purple-400" />
                       </div>
                       <p className="text-purple-300 font-medium mb-1 text-center truncate max-w-[250px]">
-                        {selectedImage.name}
+                        {selectedFile.name}
                       </p>
-                      <p className="text-purple-400/60 text-xs">Click to change image</p>
+                      <p className="text-purple-400/60 text-xs">Click to change file</p>
                     </>
                   ) : (
                     <>
                       <div className="w-16 h-16 rounded-full bg-neutral-900 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-pink-400 transition-colors" />
                       </div>
-                      <p className="text-neutral-300 font-medium mb-1">Click or drag image to upload</p>
-                      <p className="text-neutral-500 text-xs">Supports PNG, JPG, or JPEG</p>
+                      <p className="text-neutral-300 font-medium mb-1 text-center">Click to upload your resume</p>
+                      <p className="text-neutral-500 text-xs text-center px-4 max-w-sm">
+                        Supports PDF, Word (.docx, .doc), Text (.txt), or Images (PNG, JPEG)
+                      </p>
                     </>
                   )}
                 </div>

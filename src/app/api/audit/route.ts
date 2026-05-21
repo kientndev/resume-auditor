@@ -1,5 +1,12 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import fs from 'fs';
+import path from 'path';
+import os from 'os';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+
+const execFileAsync = promisify(execFile);
 
 export async function POST(req: Request) {
   try {
@@ -14,22 +21,84 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Resume text is required' }, { status: 400 });
       }
       contents = `Here is the resume text to audit:\n\n${resumeText}`;
-    } else if (mode === 'image') {
+    } else if (mode === 'file' || mode === 'image') {
       const file = formData.get('file') as File;
       if (!file) {
-        return NextResponse.json({ error: 'Resume image is required' }, { status: 400 });
+        return NextResponse.json({ error: 'Resume file is required' }, { status: 400 });
       }
-      
-      const buffer = Buffer.from(await file.arrayBuffer());
-      contents = [
-        "Here is the resume image to audit:",
-        {
-          inlineData: {
-            data: buffer.toString("base64"),
-            mimeType: file.type
+
+      const filename = file.name.toLowerCase();
+      const fileExt = filename.substring(filename.lastIndexOf('.'));
+
+      // Explicitly block Excel files
+      const isExcel = ['.xlsx', '.xls', '.csv'].includes(fileExt) || 
+                      file.type.includes('spreadsheet') || 
+                      file.type.includes('excel') || 
+                      file.type === 'text/csv';
+
+      if (isExcel) {
+        return NextResponse.json({ 
+          error: 'Excel files (.xlsx, .xls, .csv) are explicitly blocked. Please upload a PDF, Word document, text file, or image instead.' 
+        }, { status: 400 });
+      }
+
+      const isImage = ['.png', '.jpeg', '.jpg'].includes(fileExt) || file.type.startsWith('image/');
+      const isDoc = ['.pdf', '.docx', '.doc', '.txt'].includes(fileExt) || 
+                    ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'].includes(file.type);
+
+      if (isImage) {
+        // Maintain standard processing for images (Vision model)
+        const buffer = Buffer.from(await file.arrayBuffer());
+        contents = [
+          "Here is the resume image to audit:",
+          {
+            inlineData: {
+              data: buffer.toString("base64"),
+              mimeType: file.type || (fileExt === '.png' ? 'image/png' : 'image/jpeg')
+            }
+          }
+        ];
+      } else if (isDoc) {
+        // Save file to a temporary location
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const tempDir = os.tmpdir();
+        const tempFileName = `resume-${Date.now()}${fileExt}`;
+        const tempFilePath = path.join(tempDir, tempFileName);
+
+        await fs.promises.writeFile(tempFilePath, buffer);
+
+        let parsedText = '';
+        try {
+          const scriptPath = path.join(process.cwd(), 'scripts', 'parser.py');
+          const { stdout } = await execFileAsync('python', [scriptPath, tempFilePath], {
+            env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+          });
+          parsedText = stdout.trim();
+        } catch (err: any) {
+          console.error('Python Parser Error:', err);
+          const errMsg = err.stderr || err.message || 'Failed to parse document text.';
+          return NextResponse.json({ error: `Document parsing error: ${errMsg}` }, { status: 500 });
+        } finally {
+          // Clean up temp file
+          try {
+            if (fs.existsSync(tempFilePath)) {
+              await fs.promises.unlink(tempFilePath);
+            }
+          } catch (unlinkErr) {
+            console.error('Failed to delete temp file:', unlinkErr);
           }
         }
-      ];
+
+        if (!parsedText) {
+          return NextResponse.json({ error: 'Extracted text is empty. Please ensure the document is not empty or password-protected.' }, { status: 400 });
+        }
+
+        contents = `Here is the resume text to audit:\n\n${parsedText}`;
+      } else {
+        return NextResponse.json({ 
+          error: 'Unsupported file format. Please upload a PDF, Word document (.docx, .doc), text file (.txt), or image (.png, .jpeg).' 
+        }, { status: 400 });
+      }
     } else {
       return NextResponse.json({ error: 'Invalid mode' }, { status: 400 });
     }
