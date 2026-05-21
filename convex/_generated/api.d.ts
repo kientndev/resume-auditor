@@ -10,6 +10,7 @@
 
 import type * as resumes from "../resumes.js";
 import type * as users from "../users.js";
+import type * as waitlist from "../waitlist.js";
 
 import type {
   ApiFromModules,
@@ -20,6 +21,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   resumes: typeof resumes;
   users: typeof users;
+  waitlist: typeof waitlist;
 }>;
 
 /**
