@@ -86,6 +86,19 @@ def main():
         sys.exit(1)
 
     file_path = sys.argv[1]
+
+    # --- Path traversal guard ---
+    # Resolve symlinks and normalize to an absolute path, then confirm
+    # the file lives inside the OS temp directory to prevent traversal attacks.
+    import tempfile
+    resolved_path = os.path.realpath(os.path.abspath(file_path))
+    temp_dir = os.path.realpath(tempfile.gettempdir())
+    if not resolved_path.startswith(temp_dir + os.sep) and resolved_path != temp_dir:
+        print(f"Error: Refusing to process file outside of temp directory: {resolved_path}", file=sys.stderr)
+        sys.exit(1)
+    file_path = resolved_path
+    # ----------------------------
+
     if not os.path.exists(file_path):
         print(f"Error: File not found: {file_path}", file=sys.stderr)
         sys.exit(1)

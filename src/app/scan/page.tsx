@@ -7,6 +7,8 @@ import ReactMarkdown from "react-markdown";
 import Link from "next/link";
 import { trackEvent } from "@/utils/analytics";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 export default function ScanPage() {
   const [mode, setMode] = useState<"text" | "file">("text");
   const [resumeText, setResumeText] = useState("");
@@ -21,6 +23,13 @@ export default function ScanPage() {
     const ext = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
     const allowedExts = ['.pdf', '.docx', '.doc', '.txt', '.png', '.jpeg', '.jpg'];
     const excelExts = ['.xlsx', '.xls', '.csv'];
+
+    if (file.size > MAX_FILE_SIZE) {
+      setError("File is too large. Maximum allowed size is 10 MB.");
+      setSelectedFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
 
     if (excelExts.includes(ext)) {
       setError("Excel files (.xlsx, .xls, .csv) are explicitly blocked. Please upload a PDF, Word document, text file, or image instead.");
