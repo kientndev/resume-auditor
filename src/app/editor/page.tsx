@@ -36,6 +36,8 @@ export default function EditorPage() {
   const { user, isLoaded: userLoaded } = useUser();
   const saveResume = useMutation(api.resumes.saveResume);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [generateError, setGenerateError] = useState("");
   
   const [resumeData, setResumeData] = useState<ResumeData>({
     personalInfo: {
@@ -61,6 +63,7 @@ export default function EditorPage() {
   const handleGenerate = async () => {
     if (!rawText.trim()) return;
     setLoading(true);
+    setGenerateError("");
     try {
       const res = await fetch("/api/generate-resume", {
         method: "POST",
@@ -68,6 +71,14 @@ export default function EditorPage() {
         body: JSON.stringify({ resumeText: rawText })
       });
       const data = await res.json();
+
+      if (!res.ok) {
+        if (res.status === 403 && data.code === "FREE_PLAN_LIMIT_REACHED") {
+          setIsUpgradeModalOpen(true);
+        }
+        throw new Error(data.error || "Failed to generate resume.");
+      }
+
       if (data.result) {
         setResumeData(data.result);
         trackEvent("resume_generated", {
@@ -76,6 +87,7 @@ export default function EditorPage() {
         });
       }
     } catch (err) {
+      setGenerateError(err instanceof Error ? err.message : "Failed to generate resume.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -389,6 +401,9 @@ export default function EditorPage() {
                   <><Sparkles className="w-5 h-5" /> Generate and Optimize Resume</>
                 )}
               </button>
+              {generateError && (
+                <p className="text-xs text-red-400">{generateError}</p>
+              )}
             </div>
 
             {/* Section: Personal Info */}
@@ -690,6 +705,47 @@ export default function EditorPage() {
 
       {/* Modern Modal: Full Document Preview */}
       <AnimatePresence>
+        {isUpgradeModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsUpgradeModalOpen(false)}
+              className="absolute inset-0 bg-black/85 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative z-10 w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-3xl p-6 shadow-2xl"
+            >
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Upgrade to Pro</h3>
+                  <p className="text-sm text-neutral-400 mt-1">
+                    Free users get 3 AI resume generations per month. Upgrade for unlimited advanced generation.
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIsUpgradeModalOpen(false)}
+                    className="flex-1 bg-neutral-950 border border-neutral-800 text-neutral-300 text-sm font-semibold px-4 py-3 rounded-xl hover:bg-neutral-800 transition-colors"
+                  >
+                    Not Now
+                  </button>
+                  <a
+                    href="/pricing"
+                    className="flex-1 text-center bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm font-semibold px-4 py-3 rounded-xl"
+                  >
+                    View Pro
+                  </a>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {isPreviewOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}

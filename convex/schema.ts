@@ -11,6 +11,10 @@ export default defineSchema({
     level: v.optional(v.number()),
     threatsBlocked: v.optional(v.number()),
     xp: v.optional(v.number()),
+    plan: v.optional(v.union(v.literal("free"), v.literal("pro"))),
+    auditCount: v.optional(v.number()),
+    generateCount: v.optional(v.number()),
+    resetDate: v.optional(v.number()),
   }).index("by_clerk_id", ["clerkId"]),
   resumes: defineTable({
     userId: v.string(),

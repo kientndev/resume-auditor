@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { GoogleGenAI, Type } from '@google/genai';
+import { auth, currentUser } from '@clerk/nextjs/server';
+import { ConvexHttpClient } from 'convex/browser';
+import { api } from '../../../../convex/_generated/api';
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
@@ -168,11 +171,52 @@ export async function POST(req: Request) {
     const formData = await req.formData();
     const mode = formData.get('mode') as string;
     const apiKey = process.env.GEMINI_API_KEY;
+    const { userId } = await auth();
+
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'Please sign in to audit a resume.' },
+        { status: 401 }
+      );
+    }
 
     if (!apiKey) {
       return NextResponse.json(
         { error: 'Gemini API key is missing in environment variables' },
         { status: 500 }
+      );
+    }
+
+    const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!convexUrl) {
+      return NextResponse.json(
+        { error: 'Convex URL is missing' },
+        { status: 500 }
+      );
+    }
+
+    const convex = new ConvexHttpClient(convexUrl);
+    const clerkUser = await currentUser();
+    await convex.mutation(api.users.getOrCreateUser, {
+      clerkId: userId,
+      email: clerkUser?.emailAddresses[0]?.emailAddress,
+      name: clerkUser?.fullName || clerkUser?.firstName || undefined,
+      imageUrl: clerkUser?.imageUrl || undefined,
+    });
+
+    const usage = await convex.mutation(api.users.validateAndTrackUsage, {
+      clerkId: userId,
+      action: "audit",
+    });
+
+    if (!usage.authorized) {
+      return NextResponse.json(
+        {
+          code: usage.reason,
+          error: 'Free plan audit limit reached.',
+          usage,
+        },
+        { status: 403 }
       );
     }
 
