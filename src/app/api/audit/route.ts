@@ -12,6 +12,82 @@ export const runtime = 'nodejs';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
+type AuditResult = {
+  grade: string;
+  brutalTruth: string;
+  topFixes: Array<{ area: string; instruction: string }>;
+  beforeAfter: { original: string; improved: string };
+};
+
+function createFallbackAuditResult(reason: string, raw?: string): AuditResult {
+  return {
+    grade: 'F',
+    brutalTruth: `The audit response could not be parsed into the expected JSON shape. ${reason}`,
+    topFixes: [
+      {
+        area: 'Response parsing',
+        instruction:
+          'Retry the audit. If this continues, shorten the resume input or upload a cleaner PDF/text file.',
+      },
+      {
+        area: 'Model output',
+        instruction:
+          'The AI returned malformed or incomplete JSON, so the server returned this safe fallback object.',
+      },
+      {
+        area: 'Debug detail',
+        instruction: raw
+          ? `Raw response preview: ${raw.slice(0, 240)}`
+          : 'No raw response text was available.',
+      },
+    ],
+    beforeAfter: {
+      original: 'Unable to extract a reliable before example from the malformed audit response.',
+      improved:
+        'Retry the audit to generate a structured before/after rewrite from the resume content.',
+    },
+  };
+}
+
+function cleanJsonString(rawStr: string) {
+  let cleaned = rawStr
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
+
+  return cleaned.replace(/,\s*([}\]])/g, '$1').trim();
+}
+
+function parseAuditJson(raw: string): AuditResult {
+  const cleaned = cleanJsonString(raw);
+
+  console.log('[audit] Raw Gemini response:', raw);
+  console.log('[audit] Cleaned Gemini response:', cleaned);
+
+  try {
+    return JSON.parse(cleaned) as AuditResult;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('[audit] Failed to parse Gemini JSON:', message);
+    console.error(
+      '[audit] Cleaned response character breakdown:',
+      Array.from(cleaned).map((char, index) => ({
+        index,
+        char,
+        code: char.charCodeAt(0),
+      }))
+    );
+    return createFallbackAuditResult(message, raw);
+  }
+}
+
 /** Strict schema enforced on every non-image audit response */
 const RESPONSE_SCHEMA = {
   type: Type.OBJECT,
@@ -246,13 +322,13 @@ export async function POST(req: Request) {
       streamConfig.responseSchema = RESPONSE_SCHEMA;
     }
 
-    // Stream raw tokens to the client; client buffers and parses when done.
-    // Provider errors are emitted in-band so the browser does not log /api/audit
-    // as a failed network resource for recoverable upstream failures.
+    // Collect and normalize the model response server-side so the client always
+    // receives a JSON object matching AuditResult.
     const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
         try {
+          let rawResponse = '';
           const stream = await ai.models.generateContentStream({
             model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
             contents: contents,
@@ -262,15 +338,18 @@ export async function POST(req: Request) {
           for await (const chunk of stream) {
             const text = chunk.text;
             if (text) {
-              controller.enqueue(encoder.encode(text));
+              rawResponse += text;
             }
           }
-        } catch (err: any) {
-          // Encode error as a sentinel so the client can surface it cleanly
+
           controller.enqueue(
-            encoder.encode(
-              JSON.stringify({ __error: err.message || 'Stream error' })
-            )
+            encoder.encode(JSON.stringify(parseAuditJson(rawResponse)))
+          );
+        } catch (err: any) {
+          const message = err.message || 'Gemini stream error';
+          console.error('[audit] Gemini stream error:', message);
+          controller.enqueue(
+            encoder.encode(JSON.stringify(createFallbackAuditResult(message)))
           );
         } finally {
           controller.close();

@@ -3,14 +3,11 @@
 import { useState, FormEvent } from "react";
 import { Check, Zap, Crown, Sparkles, Loader2, PartyPopper, Mail } from "lucide-react";
 import Link from "next/link";
-import { useMutation } from "convex/react";
-import { api } from "../../../convex/_generated/api";
 
 export default function PricingPage() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
-  const joinWaitlist = useMutation(api.waitlist.join);
 
   const handleWaitlistSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -25,12 +22,22 @@ export default function PricingPage() {
 
     setStatus("loading");
     try {
-      const result = await joinWaitlist({ email: trimmed });
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed }),
+      });
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error || "Something went wrong. Please try again.");
+      }
+
       setStatus("success");
       setMessage(result.message);
-    } catch {
+    } catch (error) {
       setStatus("error");
-      setMessage("Something went wrong. Please try again.");
+      setMessage(error instanceof Error ? error.message : "Something went wrong. Please try again.");
     }
   };
 
