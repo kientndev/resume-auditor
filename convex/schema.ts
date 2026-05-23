@@ -8,6 +8,9 @@ export default defineSchema({
     name: v.optional(v.string()),
     imageUrl: v.optional(v.string()),
     totalScans: v.number(),
+    level: v.optional(v.number()),
+    threatsBlocked: v.optional(v.number()),
+    xp: v.optional(v.number()),
   }).index("by_clerk_id", ["clerkId"]),
   resumes: defineTable({
     userId: v.string(),
