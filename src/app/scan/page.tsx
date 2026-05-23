@@ -26,6 +26,27 @@ interface AuditResult {
   beforeAfter: { original: string; improved: string };
 }
 
+function parseAuditResponse(buffer: string) {
+  const trimmed = buffer.trim();
+
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    const fenced = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+    if (fenced?.[1]) {
+      return JSON.parse(fenced[1].trim());
+    }
+
+    const firstBrace = trimmed.indexOf("{");
+    const lastBrace = trimmed.lastIndexOf("}");
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(trimmed.slice(firstBrace, lastBrace + 1));
+    }
+
+    throw new Error("Could not parse the audit response. Please try again.");
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Design constants
 // ---------------------------------------------------------------------------
@@ -332,11 +353,9 @@ export default function ScanPage() {
       // Parse complete JSON response
       let parsed: any;
       try {
-        parsed = JSON.parse(buffer);
-      } catch {
-        throw new Error(
-          "Could not parse the audit response. Please try again."
-        );
+        parsed = parseAuditResponse(buffer);
+      } catch (parseError: any) {
+        throw new Error(parseError.message);
       }
 
       if (parsed.__error) throw new Error(parsed.__error);
