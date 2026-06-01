@@ -74,7 +74,7 @@ export const saveResume = mutation({
     };
 
     if (args.id) {
-      const existing = await ctx.db.get(args.id);
+      const existing = (await ctx.db.get(args.id)) as any;
       if (!existing || existing.userId !== userRecord._id) {
         throw new Error("Unauthorized update or record not found");
       }
