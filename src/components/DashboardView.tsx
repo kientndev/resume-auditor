@@ -138,8 +138,11 @@ export default function DashboardView({ user }: DashboardViewProps) {
               </>
             ) : resumes && resumes.length > 0 ? (
               resumes.map((resume) => {
-                const isGradeA = resume.grade.startsWith("A");
-                const isGradeB = resume.grade.startsWith("B");
+                const grade = (resume as any).grade || (resume.parsedJson as any)?.grade || (resume.matchScore >= 80 ? "A" : resume.matchScore >= 60 ? "B" : "C");
+                const isGradeA = grade.startsWith("A");
+                const isGradeB = grade.startsWith("B");
+                const fullName = resume.name || (resume as any).fullName || "Untitled Resume";
+                const jobTitle = (resume.parsedJson as any)?.jobTitle || (resume as any).jobTitle || "No title specified";
                 
                 return (
                   <Link 
@@ -158,14 +161,14 @@ export default function DashboardView({ user }: DashboardViewProps) {
                             ? "bg-pink-500/10 text-pink-400 border-pink-500/20" 
                             : "bg-neutral-500/10 text-neutral-400 border-neutral-500/20"
                       }`}>
-                        ATS Grade: {resume.grade}
+                        ATS Grade: {grade}
                       </span>
                     </div>
                     <div>
                       <h4 className="font-bold text-neutral-200 text-sm group-hover:text-white transition-colors truncate">
-                        {resume.fullName || "Untitled Resume"}
+                        {fullName}
                       </h4>
-                      <p className="text-xs text-neutral-400 truncate mt-0.5">{resume.jobTitle || "No title specified"}</p>
+                      <p className="text-xs text-neutral-400 truncate mt-0.5">{jobTitle}</p>
                       <div className="flex items-center gap-1.5 text-xs text-neutral-500 mt-2">
                         <Calendar className="w-3.5 h-3.5" />
                         <span>Updated {getRelativeTime(resume.updatedAt)}</span>
