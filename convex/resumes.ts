@@ -2,10 +2,10 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
 export const getUserResumes = query({
-  args: { userId: v.string() },
+  args: { userId: v.id("users") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query("resumes")
+      .query("candidates")
       .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .order("desc")
       .collect();
@@ -14,22 +14,14 @@ export const getUserResumes = query({
 
 export const saveResume = mutation({
   args: {
-    id: v.optional(v.id("resumes")),
-    userId: v.string(),
-    fullName: v.string(),
-    jobTitle: v.string(),
+    id: v.optional(v.id("candidates")),
+    userId: v.id("users"),
+    name: v.string(),
     email: v.string(),
-    phone: v.string(),
-    grade: v.string(),
-    experience: v.array(
-      v.object({
-        company: v.string(),
-        role: v.string(),
-        duration: v.string(),
-        bullets: v.array(v.string()),
-      })
-    ),
-    skills: v.array(v.string()),
+    resumeUrl: v.string(),
+    parsedJson: v.any(),
+    matchScore: v.number(),
+    status: v.string(),
   },
   handler: async (ctx, args) => {
     const { id, ...data } = args;
@@ -45,7 +37,7 @@ export const saveResume = mutation({
       });
       return id;
     } else {
-      const newId = await ctx.db.insert("resumes", {
+      const newId = await ctx.db.insert("candidates", {
         ...data,
         updatedAt: Date.now(),
       });
@@ -53,3 +45,4 @@ export const saveResume = mutation({
     }
   },
 });
+
