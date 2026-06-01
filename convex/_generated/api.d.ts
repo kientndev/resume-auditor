@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as outreach_logs from "../outreach_logs.js";
 import type * as resumes from "../resumes.js";
 import type * as users from "../users.js";
 import type * as waitlist from "../waitlist.js";
@@ -19,6 +20,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  outreach_logs: typeof outreach_logs;
   resumes: typeof resumes;
   users: typeof users;
   waitlist: typeof waitlist;
