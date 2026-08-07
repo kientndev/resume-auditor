@@ -4,14 +4,19 @@ import { v } from "convex/values";
 export default defineSchema({
   users: defineTable({
     clerkId: v.string(),
-    email: v.string(),
-    name: v.string(),
-    companyName: v.string(),
-    createdAt: v.number(),
+    email: v.optional(v.string()),
+    name: v.optional(v.string()),
+    companyName: v.optional(v.string()),
+    createdAt: v.optional(v.number()),
     scanCount: v.optional(v.number()),
     lastScanDate: v.optional(v.string()),
     generateCount: v.optional(v.number()),
     lastGenerateDate: v.optional(v.string()),
+    totalScans: v.optional(v.number()),
+    auditCount: v.optional(v.number()),
+    plan: v.optional(v.string()),
+    resetDate: v.optional(v.number()),
+    imageUrl: v.optional(v.string()),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"]),

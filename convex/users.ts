@@ -162,6 +162,8 @@ export const resetAllUserScans = mutation({
         generateCount: 0,
         lastScanDate: "",
         lastGenerateDate: "",
+        auditCount: 0,
+        totalScans: 0,
       });
       count++;
     }
