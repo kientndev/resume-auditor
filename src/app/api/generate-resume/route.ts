@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { GoogleGenAI, Type } from '@google/genai';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { ConvexHttpClient } from 'convex/browser';
 import { api } from '../../../../convex/_generated/api';
@@ -15,41 +15,57 @@ Improve clarity, seniority signal, and scanability without inventing false emplo
 Return only JSON matching the schema.`;
 
 const RESPONSE_SCHEMA = {
-  type: "OBJECT",
+  type: Type.OBJECT,
   properties: {
     personalInfo: {
-      type: "OBJECT",
+      type: Type.OBJECT,
       properties: {
-        fullName: { type: "STRING" },
-        jobTitle: { type: "STRING" },
-        email: { type: "STRING" },
-        phone: { type: "STRING" }
+        fullName: { type: Type.STRING },
+        jobTitle: { type: Type.STRING },
+        email: { type: Type.STRING },
+        phone: { type: Type.STRING }
       },
       required: ["fullName", "jobTitle", "email", "phone"]
     },
     experience: {
-      type: "ARRAY",
+      type: Type.ARRAY,
       items: {
-        type: "OBJECT",
+        type: Type.OBJECT,
         properties: {
-          role: { type: "STRING" },
-          company: { type: "STRING" },
-          duration: { type: "STRING" },
+          role: { type: Type.STRING },
+          company: { type: Type.STRING },
+          duration: { type: Type.STRING },
           bullets: {
-            type: "ARRAY",
-            items: { type: "STRING" }
+            type: Type.ARRAY,
+            items: { type: Type.STRING }
           }
         },
         required: ["role", "company", "duration", "bullets"]
       }
     },
     skills: {
-      type: "ARRAY",
-      items: { type: "STRING" }
+      type: Type.ARRAY,
+      items: { type: Type.STRING }
     }
   },
   required: ["personalInfo", "experience", "skills"]
 };
+
+function cleanJsonString(rawStr: string) {
+  let cleaned = rawStr
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/i, '')
+    .trim();
+
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
+
+  return cleaned.replace(/,\s*([}\]])/g, '$1').trim();
+}
 
 export async function POST(req: Request) {
   try {
@@ -122,7 +138,13 @@ export async function POST(req: Request) {
       throw new Error("No response text returned from Gemini");
     }
 
-    const result = JSON.parse(response.text);
+    let result: any;
+    try {
+      result = JSON.parse(cleanJsonString(response.text));
+    } catch (parseError: any) {
+      console.error("Failed to parse Gemini response:", response.text);
+      throw new Error(`Failed to parse AI response: ${parseError.message}`);
+    }
 
     return NextResponse.json({ result, usage });
   } catch (error: any) {
