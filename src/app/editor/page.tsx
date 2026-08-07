@@ -724,7 +724,7 @@ export default function EditorPage() {
                 <div>
                   <h3 className="text-lg font-bold text-white">Upgrade to Pro</h3>
                   <p className="text-sm text-neutral-400 mt-1">
-                    Free users get 3 AI resume generations per month. Upgrade for unlimited advanced generation.
+                    Free users get 5 AI resume generations per day. Upgrade for unlimited advanced generation.
                   </p>
                 </div>
                 <div className="flex gap-3">

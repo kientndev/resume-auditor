@@ -8,6 +8,10 @@ export default defineSchema({
     name: v.string(),
     companyName: v.string(),
     createdAt: v.number(),
+    scanCount: v.optional(v.number()),
+    lastScanDate: v.optional(v.string()),
+    generateCount: v.optional(v.number()),
+    lastGenerateDate: v.optional(v.string()),
   })
     .index("by_clerkId", ["clerkId"])
     .index("by_email", ["email"]),

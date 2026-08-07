@@ -88,7 +88,7 @@ export default function PricingPage() {
               <ul className="flex-1 space-y-4 mb-8">
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-[#10b981] flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-neutral-300">3 AI Resume Audits per month</span>
+                  <span className="text-sm text-neutral-300">5 AI Resume Audits per day</span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Check className="w-5 h-5 text-[#10b981] flex-shrink-0 mt-0.5" />
