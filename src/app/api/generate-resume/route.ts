@@ -143,7 +143,7 @@ export async function POST(req: Request) {
       result = JSON.parse(cleanJsonString(response.text));
     } catch (parseError: any) {
       console.error("Failed to parse Gemini response:", response.text);
-      throw new Error(`Failed to parse AI response: ${parseError.message}`);
+      throw new Error(`Failed to parse AI response: ${parseError.message}. Raw output: ${response.text}`);
     }
 
     return NextResponse.json({ result, usage });
